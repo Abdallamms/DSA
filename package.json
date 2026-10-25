@@ -1,0 +1,28 @@
+{
+  "name": "dsa",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Abdallamms/DSA.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Abdallamms/DSA/issues"
+  },
+  "homepage": "https://github.com/Abdallamms/DSA#readme",
+  "dependencies": {
+    "express": "^5.3.0",
+    "http-errors": "^2.0.1",
+    "knex": "^3.3.0",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.24.6"
+  }
+}
