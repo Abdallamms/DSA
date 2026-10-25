@@ -1,0 +1,52 @@
+### Adicionar Cidade
+POST http://localhost:8000/cidades
+Content-Type: application/json
+
+{
+  "nome": "Porto Alegre"
+}
+
+### Listar Cidades
+GET http://localhost:8000/cidades
+
+### Adicionar Produtos
+POST http://localhost:8000/produtos
+Content-Type: application/json
+{
+  "id": 2,
+  "nome": "Teclado Mecânico RGB",
+  "preco": 250.00,
+  "quantidade": 15,
+  "categoria_id": 1,
+  "is_admin": 1
+}
+
+### 5. Ver produtos Dispóniveis
+GET http://localhost:8000/produtos/disponiveis
+
+### 6. Deletar um produto
+DELETE http://localhost:8000/produtos/0
+Content-Type: application/json
+
+{
+  "is_admin": 1
+}
+
+### 7. Ver Clientes cadastrados
+GET http://localhost:8000/clientes
+
+### 8. Realizar um novo pedido
+POST http://localhost:8000/pedidos
+Content-Type: application/json
+
+{
+  "endereco": "Avenida Ipiranga, 1234",
+  "cliente_id": 1,
+  "itens": [
+    {
+      "produto_id": 2,
+      "preco": 250.00,
+      "quantidade": 1
+    }
+  ]
+}

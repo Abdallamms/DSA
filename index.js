@@ -5,7 +5,7 @@ const http_errors = require('http-errors')
 const api = express();
 api.use(express.json()); 
 
-const port = 8000;
+const port = 8000
 
 const conn = knex({
     client: "mysql",
@@ -18,9 +18,9 @@ const conn = knex({
 });
 
 api.post('/cadastro', (req, res, next) => {
-    const { nome, altura, nascimento, cidade_id, email, senha } = req.body;
+    const { nome, altura, nascimento, cidade_id} = req.body;
 
-    if (!nome || !altura|| !nascimento|| !cidade_id|| !email || !senha) {
+    if (!nome || !altura|| !nascimento|| !cidade_id) {
         return res.status(400).json({ erro: "O preenchimento dos campos é obrigatório!" });
     }
 
@@ -49,6 +49,21 @@ api.post('/cadastro', (req, res, next) => {
         .catch(next);
 });
 
+api.get('/clientes', (req, res, next) => {
+    conn("clientes")
+        .select("*")
+        .then((clientes) => {
+             const Cliente = clientes.map(c =>{
+                return{
+                    ...c,
+                    nascimento: c.nascimento ? new Date (c.nascimento).toISOString().split('T')[0]: null
+                };
+             });
+            res.status(200).json(Cliente);
+        })
+        .catch(next);
+});
+
 api.post('/login', (req, res, next) => {
     const { email, senha } = req.body;
     if (!email || !senha) {
@@ -72,17 +87,18 @@ api.post('/login', (req, res, next) => {
 });
 
 api.post('/produtos', (req, res, next) => {
-    const { nome, preco, quantidade, categoria_id, is_admin } = req.body;
+    const { nome, preco,id, quantidade, categoria_id, is_admin } = req.body;
     if (is_admin !== 1) {
         return res.status(403).json({ erro: "Acesso negado. Apenas administradores podem cadastrar produtos!" });
     }
-    if (!nome || !preco ||!quantidade || !categoria_id) {
+    if (!nome || !preco ||!id ||!quantidade || !categoria_id) {
         return res.status(400).json({ erro: "Os campos nome, preço e categoria são obrigatórios!" });
     }
-    conn("produto")
+    conn("produtos")
         .insert({
             nome: nome,
             preco: preco,
+            id: id, 
             quantidade: quantidade,
             categoria_id: categoria_id
         })
@@ -91,14 +107,46 @@ api.post('/produtos', (req, res, next) => {
         })
         .catch(next); 
 });
-api.get("/produtos",(req, res , next) => {
+
+api.get("/produtos", (req, res , next) => {
     conn("produtos")
-    .select("*")
-    .then(() => {
-            res.status(201).json({ resposta: "Produto cadastrado com sucesso pelo administrador!" });
+     .select("*")
+     .then((produtos) => {
+         res.status(201).json(produtos);
         })
         .catch(next); 
 })
+
+api.delete('/produtos/:id', (req, res, next) => {
+    const { id } = req.params;
+    const { is_admin } = req.body;
+    if (is_admin !== 1) {
+        return res.status(403).json({ erro: "Acesso negado. Apenas administradores podem deletar produtos!" });
+    }
+    conn("produtos")
+        .where({ id: id })
+        .del()
+        .then((Deletar) => {
+            if (Deletar === 0) {
+                return res.status(404).json({ erro: "Produto não encontrado para exclusão!" });
+            }
+
+            res.status(200).json({ resposta: "Produto deletado com sucesso pelo administrador!" });
+        })
+        .catch(next);
+});
+
+api.get("/produtos/disponiveis", (req, res, next) => {
+    conn("produtos")
+        .select("*")
+        .where("quantidade", ">", 0) 
+        .then((produtosDisponiveis) => {
+            res.status(200).json(produtosDisponiveis);
+        })
+        .catch(next);
+});
+
+
 api.post('/cidades', (req, res, next) => {
     const { nome } = req.body;
     if (!nome) {
@@ -122,17 +170,39 @@ api.get('/cidades', (req, res, next) => {
         .catch(next);
 });
 
-
-api.post("/cadastro", Cadastro);
-api.post("/login", Login);
-api.get("/produtos", ConsultarProdutos);
-api.post("/pedidos", RealizarPedido);
-api.get("/pedidos", ListarPedidosCliente);
-
-api.post("/admin/produtos", VerificarAdmin, CriarProduto);
-api.put("/admin/produtos/:id", VerificarAdmin, AtualizarProduto);
-api.delete("/admin/produtos/:id", VerificarAdmin, ExcluirProduto);
-api.get("/admin/pedidos", VerificarAdmin, ListarTodosPedidos);
+api.post('/pedidos', (req, res, next) => {
+    const { endereco, cliente_id, itens } = req.body;
+    if (!endereco || !cliente_id || !itens || !Array.isArray(itens) || itens.length === 0) {
+        return res.status(400).json({ erro: "Os campos endereco, cliente_id e a lista de itens são obrigatórios!" });
+    }
+    conn("pedidos")
+        .insert({
+            horario: new Date(),
+            endereco: endereco,
+            cliente_id: cliente_id
+        })
+        .then((idDoPedidoGerado) => {
+            const pedido_id = idDoPedidoGerado[0];
+            const itensParaSalvar = itens.map(item => {
+                return {
+                    pedido_id: pedido_id,
+                    produto_id: item.produto_id,
+                    preco: item.preco,
+                    quantidade: item.quantidade
+                };
+            });
+            conn("pedidos_produtos")
+                .insert(itensParaSalvar)
+                .then(() => {
+                    res.status(201).json({ 
+                        resposta: "Pedido realizado com sucesso!",
+                        pedido_id: pedido_id 
+                    });
+                })
+                .catch(next);
+        })
+        .catch(next);
+});
 
 api.listen(port, () => {
     console.log(`API rodando em http://localhost:${port}`);
