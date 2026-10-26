@@ -1,9 +1,28 @@
+# É NECESSARIO A EXTENSÃO REST CLIENT
+
+### Novo cadastro
+POST http://localhost:8000/cadastro
+Content-Type: application/json
+
+{
+  "nome": "Carlos Souza",
+  "altura": 1.80,
+  "nascimento": "1994-08-22",
+  "cidade_id": 2,
+  "email": "carlo@gmail.com",
+  "senha": "senha123"
+}
+
+### Ver Clientes cadastrados
+GET http://localhost:8000/clientes
+
 ### Adicionar Cidade
 POST http://localhost:8000/cidades
 Content-Type: application/json
 
 {
-  "nome": "Porto Alegre"
+  "id": 6,
+  "nome": "Rio de Janeiro"
 }
 
 ### Listar Cidades
@@ -12,19 +31,32 @@ GET http://localhost:8000/cidades
 ### Adicionar Produtos
 POST http://localhost:8000/produtos
 Content-Type: application/json
+
 {
-  "id": 2,
-  "nome": "Teclado Mecânico RGB",
-  "preco": 250.00,
-  "quantidade": 15,
+  "id": 10,
+  "nome": "Carregador",
+  "preco": 25.00,
+  "quantidade": 30,
   "categoria_id": 1,
   "is_admin": 1
 }
 
-### 5. Ver produtos Dispóniveis
+### Listar Produtos
 GET http://localhost:8000/produtos/disponiveis
 
-### 6. Deletar um produto
+### Atualizar Produtos
+PUT http://localhost:8000/produtos/2
+Content-Type: application/json
+
+{
+  "nome": "Teclado Mecânico Gamer Pro RGB",
+  "preco": 299.90,
+  "quantidade": 10,
+  "categoria_id": 1,
+  "is_admin": 1
+}
+
+### Deletar um produto
 DELETE http://localhost:8000/produtos/0
 Content-Type: application/json
 
@@ -32,21 +64,43 @@ Content-Type: application/json
   "is_admin": 1
 }
 
-### 7. Ver Clientes cadastrados
-GET http://localhost:8000/clientes
-
-### 8. Realizar um novo pedido
+### Realizar um novo pedido
 POST http://localhost:8000/pedidos
 Content-Type: application/json
 
 {
-  "endereco": "Avenida Ipiranga, 1234",
-  "cliente_id": 1,
+  "endereco": "Avenida Paulista, 986",
+  "cliente_id": 3,
   "itens": [
     {
-      "produto_id": 2,
-      "preco": 250.00,
-      "quantidade": 1
+      "produto_id": 3,
+      "preco": 25.00,
+      "quantidade": 3
     }
   ]
 }
+
+### Administrador Listar todos os pedidos Pendentes
+POST http://localhost:8000/admin/pedidos
+Content-Type: application/json
+
+{
+  "is_admin": 1
+}
+
+### Mudar Status (Mude o Número dentro do put, correspondente ao id do pedido que foi entregue)
+PUT http://localhost:8000/pedidos/1/entregar
+Content-Type: application/json
+
+{
+  "is_admin": 1
+}
+
+### 3. Pedidos Entregues
+POST http://localhost:8000/admin/pedidos/entregues
+Content-Type: application/json
+
+{
+  "is_admin": 1
+}
+

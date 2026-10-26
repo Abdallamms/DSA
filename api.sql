@@ -29,6 +29,7 @@ CREATE TABLE  pedidos(
     horario DATETIME,
     endereco VARCHAR(200) NOT NULL,
     cliente_id INT NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDENTE',
     FOREIGN KEY (cliente_id) REFERENCES  clientes(id)
 );
 

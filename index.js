@@ -18,9 +18,9 @@ const conn = knex({
 });
 
 api.post('/cadastro', (req, res, next) => {
-    const { nome, altura, nascimento, cidade_id} = req.body;
+    const { nome, altura, nascimento, cidade_id, email, senha} = req.body;
 
-    if (!nome || !altura|| !nascimento|| !cidade_id) {
+    if (!nome || !altura|| !nascimento|| !cidade_id || !email || !senha) {
         return res.status(400).json({ erro: "O preenchimento dos campos é obrigatório!" });
     }
 
@@ -200,6 +200,98 @@ api.post('/pedidos', (req, res, next) => {
                     });
                 })
                 .catch(next);
+        })
+        .catch(next);
+});
+
+api.post('/admin/pedidos', (req, res, next) => {
+    const { is_admin } = req.body;
+    if (is_admin !== 1) {
+        return res.status(403).json({ erro: "Acesso negado!!!!! Apenas administradores podem listar todos os pedidos!" });
+    }
+
+    conn("pedidos")
+        .select(
+            "pedidos.id as pedido_id",
+            "pedidos.horario",
+            "pedidos.endereco",
+            "clientes.nome as nome_cliente",
+            "clientes.email as email_cliente",
+            "pedidos.status"
+        )
+        .innerJoin("clientes", "pedidos.cliente_id", "clientes.id")
+        .then((TodosOsPedidos) => {
+            res.status(200).json(TodosOsPedidos);
+        })
+        .catch(next);
+});
+
+api.put('/pedidos/:id/entregar', (req, res, next) => {
+    const { id } = req.params;
+    const { is_admin } = req.body;
+
+    if (is_admin !== 1) {
+        return res.status(403).json({ erro: "Acesso negado. Apenas administradores podem entregar pedidos!" });
+    }
+
+    conn("pedidos")
+        .where({ id: id })
+        .update({ status: 'ENTREGUE' }) 
+        .then((Atualizar) => {
+            if (Atualizar === 0) {
+                return res.status(404).json({ erro: "Pedido não encontrado!" });
+            }
+            res.status(200).json({ resposta: "Pedido ENTREGUE com sucesso!" });
+        })
+        .catch(next);
+});
+
+api.post('/admin/pedidos/pendentes', (req, res, next) => {
+    const { is_admin } = req.body;
+    if (is_admin !== 1) return res.status(403).json({ erro: "Acesso negado." });
+
+    conn("pedidos")
+        .select("pedidos.id", "pedidos.horario", "pedidos.endereco", "pedidos.status", "clientes.nome as cliente")
+        .innerJoin("clientes", "pedidos.cliente_id", "clientes.id")
+        .where({ "pedidos.status": 'PENDENTE' })
+        .then((pedidos) => res.status(200).json(pedidos))
+        .catch(next);
+});
+
+api.post('/admin/pedidos/entregues', (req, res, next) => {
+    const { is_admin } = req.body;
+    if (is_admin !== 1) return res.status(403).json({ erro: "Acesso negado." });
+
+    conn("pedidos")
+        .select("pedidos.id", "pedidos.horario", "pedidos.endereco", "pedidos.status", "clientes.nome as cliente")
+        .innerJoin("clientes", "pedidos.cliente_id", "clientes.id")
+        .where({ "pedidos.status": 'ENTREGUE' })
+        .then((pedidos) => res.status(200).json(pedidos))
+        .catch(next);
+});
+
+
+api.put('/produtos/:id', (req, res, next) => {
+    const { id } = req.params;
+    const { nome, preco, quantidade, categoria_id, is_admin } = req.body;
+
+    if (is_admin !== 1) {
+        return res.status(403).json({ erro: "Acesso negado. Apenas administradores podem atualizar produtos!" });
+    }
+
+    conn("produtos")
+        .where({ id: id })
+        .update({
+            nome: nome,
+            preco: preco,
+            quantidade: quantidade,
+            categoria_id: categoria_id
+        })
+        .then((Atualizado) => {
+            if (Atualizado === 0) {
+                return res.status(404).json({ erro: "Produto não encontrado para atualização!" });
+            }
+            res.status(200).json({ resposta: "Produto atualizado com sucesso pelo administrador!" });
         })
         .catch(next);
 });
