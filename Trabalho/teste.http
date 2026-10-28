@@ -21,8 +21,8 @@ POST http://localhost:8000/cidades
 Content-Type: application/json
 
 {
-  "id": 6,
-  "nome": "Rio de Janeiro"
+  "id": 7,
+  "nome": "Gravataí"
 }
 
 ### Listar Cidades

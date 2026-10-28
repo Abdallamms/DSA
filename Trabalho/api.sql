@@ -1,5 +1,3 @@
-
-## Senha e email adicionados na tabela clientes
 CREATE DATABASE bd_dsapi;
 Use bd_dsapi;
 
@@ -16,8 +14,6 @@ CREATE TABLE categorias(
 CREATE TABLE clientes (
     id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR (100) NOT NULL,
-    email VARCHAR(100) NOT NULL,
-    senha VARCHAR(255) NOT NULL,
     altura DOUBLE NOT NULL,
     nascimento DATE NOT NULL,
     cidade_id INT NOT NULL,
@@ -29,7 +25,6 @@ CREATE TABLE  pedidos(
     horario DATETIME,
     endereco VARCHAR(200) NOT NULL,
     cliente_id INT NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'PENDENTE',
     FOREIGN KEY (cliente_id) REFERENCES  clientes(id)
 );
 
